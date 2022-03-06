@@ -35,8 +35,8 @@ INDEX_TABLE = {
 
 class ESRetrieval(object):
     def __init__(self, index_name, index_dir,
-        host=os.environ.get("ES_HOST", "127.0.0.1"),
-        port=os.environ.get("ES_PORT", 9200)):
+                 host=os.environ.get("ES_HOST", "127.0.0.1"),
+                 port=os.environ.get("ES_PORT", 9200)):
         self.index_name = index_name
         self.client = Elasticsearch([host])
         self.load(index_dir)
@@ -50,6 +50,7 @@ class ESRetrieval(object):
                 request["_index"] = self.index_name
                 requests.append(request)
             bulk(self.client, requests)
+
         # 1. 读取索引
         h5f = h5py.File(index_dir, 'r')
         self.retrieval_db = h5f['dataset_1'][:]
@@ -160,5 +161,5 @@ class ESRetrieval(object):
                     "score": round(score, 6)
                 }
                 r_list.append(temp)
-        
+
         return r_list

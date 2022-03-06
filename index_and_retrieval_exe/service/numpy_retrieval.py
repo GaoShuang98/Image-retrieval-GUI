@@ -33,5 +33,5 @@ class NumpyRetrieval(object):
                     "score": round(score, 6)
                 }
                 r_list.append(temp)
-        
+
         return r_list

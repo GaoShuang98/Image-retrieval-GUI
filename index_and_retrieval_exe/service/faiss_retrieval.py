@@ -21,13 +21,13 @@ class FaissRetrieval(object):
         h5f.close()
         # 2. 加载faiss
         self.retrieval_db = np.asarray(self.retrieval_db).astype(np.float32)  # 将读取到的向量列表转化成array
-        self.index = faiss.IndexFlatIP(self.emb_size)
+        self.index = faiss.IndexFlatIP(self.emb_size)  # 为向量集构建IndexFlatL2索引，精准的内积搜索
         # self.index.train(self.retrieval_db)
         self.index.add(self.retrieval_db)
         print("************* Done faiss indexing, Indexed {} documents *************".format(len(self.retrieval_db)))
 
-    def retrieve(self, query_vector, search_size=3):
-        score_list, index_list = self.index.search(np.array([query_vector]).astype(np.float32), search_size)
+    def retrieve(self, query_vector, search_size=3):  # 其中search_size 是搜索到的最相近的图像个数
+        score_list, index_list = self.index.search(np.array([query_vector]).astype(np.float32), k=search_size)
         r_list = []
         for i, val in enumerate(index_list[0]):
             name = self.retrieval_name[int(val)]

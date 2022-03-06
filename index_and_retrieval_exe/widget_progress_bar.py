@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_widget_progress_bar(QtWidgets.QWidget):
     def __init__(self):
         super(Ui_widget_progress_bar, self).__init__()
@@ -64,4 +65,3 @@ class Ui_widget_progress_bar(QtWidgets.QWidget):
         _translate = QtCore.QCoreApplication.translate
         widget_progress_bar.setWindowTitle(_translate("widget_progress_bar", "Form"))
         self.feature_extract_info_label.setText(_translate("widget_progress_bar", "Feature extract info ..."))
-

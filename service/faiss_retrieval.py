@@ -11,7 +11,7 @@ THRESHOLD = float(os.environ.get('THRESHOLD', '0.85'))  # 检索阈值
 class FaissRetrieval(object):
     def __init__(self, index_dir, emb_size=512):
         self.emb_size = emb_size
-        self.load(index_dir)
+        self.load(index_dir)  # 初始化
 
     def load(self, index_dir):
         # 1.读取索引
@@ -38,5 +38,4 @@ class FaissRetrieval(object):
                     "score": round(score, 6)
                 }
                 r_list.append(temp)
-        
         return r_list

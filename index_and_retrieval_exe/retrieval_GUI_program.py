@@ -127,6 +127,7 @@ class RetrievalProgram(QMainWindow, Ui_MainWindow, Ui_widget_progress_bar):  # �
 
         self.train_data_dir = r'E:\StreetData\UCF-Google-Streetview-II-Data\Google_Street-View_Images'  # 训练图像所在文件夹路径
         self.retrieval_data_dir = r"E:\StreetData\UCF-Google-Streetview-II-Data\Queries\1.jpg"  # 查询图像路径
+        # self.retrieval_data_dir = r'E:\StreetData\UCF-Google-Streetview-II-Data\souls'
         self.parser = argparse.ArgumentParser()
         self.pause_signal = None  # 特征提取过程停止的信号变量
         self.retrieval_DB_dir = r"E:\StreetData\UCF-Google-Streetview-II-Data\image-retrieval\index\train(265490pics).h5"
@@ -144,7 +145,6 @@ class RetrievalProgram(QMainWindow, Ui_MainWindow, Ui_widget_progress_bar):  # �
         self.retrieval_DB_dir = QFileDialog.getOpenFileName(self, caption='请选择搜索图像特征库', filter='*.h5')[0]
         print("self.retrieval_DB_dir {}".format(self.retrieval_DB_dir))
         self.lineEdit_retrieval_DB_dir.setText(self.retrieval_DB_dir)
-
 
     def get_imlist(self, path):
         """
@@ -165,7 +165,8 @@ class RetrievalProgram(QMainWindow, Ui_MainWindow, Ui_widget_progress_bar):  # �
 
         """
         print('get_img_dir() clicked!')
-        self.train_data_dir = os.path.dirname(QFileDialog.getOpenFileName(self, '请选择训练图像所在文件夹！', 'home', filter='*.jpg *.JPG *.png')[0])
+        self.train_data_dir = os.path.dirname(
+            QFileDialog.getOpenFileName(self, '请选择训练图像所在文件夹！', 'home', filter='*.jpg *.JPG *.png')[0])
         print('训练图像文件夹路径为：{}'.format(self.train_data_dir))
         if not self.train_data_dir:
             return
@@ -230,7 +231,6 @@ class RetrievalProgram(QMainWindow, Ui_MainWindow, Ui_widget_progress_bar):  # �
         self.work.trigger.connect(self.update_label)
         self.work.exit()
 
-
     def update_label(self, signal):
         if signal:
             self.widget_progress_bar.progressBar.setValue(signal)
@@ -255,19 +255,21 @@ class RetrievalProgram(QMainWindow, Ui_MainWindow, Ui_widget_progress_bar):  # �
         self.label_retrieval_img.setText('待搜索图像：{}'.format(self.retrieval_data_dir))  # 修改待搜索图像下方label
         self.retrieval_data_dad_dir = os.path.dirname(self.retrieval_data_dir)  # 获得图像路径的父路径
         self.retrieval_data_list = os.listdir(self.retrieval_data_dad_dir)  # 获取图像所在文件夹中所有图像路径list
-        self.retrieval_data_index = self.retrieval_data_list.index(os.path.basename(self.retrieval_data_dir))  # 获得当前待搜索图像在该文件夹list中的索引
+        self.retrieval_data_index = self.retrieval_data_list.index(
+            os.path.basename(self.retrieval_data_dir))  # 获得当前待搜索图像在该文件夹list中的索引
 
         self.pushButton_previous_pic.setEnabled(True)
         self.pushButton_next_pic.setEnabled(True)
 
     def previous_pic(self):
-        print('pushbutton previous_pic clicked!')
+        # print('pushbutton previous_pic clicked!')
 
         self.retrieval_data_index -= 1
         if self.retrieval_data_index == -1:
             self.retrieval_data_index = len(self.retrieval_data_list) - 1
         self.retrieval_DB_dir = self.lineEdit_retrieval_DB_dir.text()
-        self.retrieval_data_dir = os.path.join(self.retrieval_data_dad_dir , self.retrieval_data_list[self.retrieval_data_index])
+        self.retrieval_data_dir = os.path.join(self.retrieval_data_dad_dir,
+                                               self.retrieval_data_list[self.retrieval_data_index])
         self.show_img_in_graphicview(self.graphicsView_retrieval_img, self.retrieval_data_dir)  # 显示待搜索图像
         self.label_retrieval_img.setText('待搜索图像：{}'.format(self.retrieval_data_dir))  # 修改待搜索图像下方label
         # 1.图片推理
@@ -313,14 +315,14 @@ class RetrievalProgram(QMainWindow, Ui_MainWindow, Ui_widget_progress_bar):  # �
             self.show_img_in_graphicview(self.graphicsView_retrieved_img_3, 'cross.png')
             self.label_retrieved_img_3.setText('无结果')
 
-
     def next_pic(self):
-        print('pushbutton next_pic clicked!')
+        # print('pushbutton next_pic clicked!')
         self.retrieval_data_index += 1
         if self.retrieval_data_index == len(self.retrieval_data_list):
             self.retrieval_data_index = 0
         self.retrieval_DB_dir = self.lineEdit_retrieval_DB_dir.text()
-        self.retrieval_data_dir = os.path.join(self.retrieval_data_dad_dir , self.retrieval_data_list[self.retrieval_data_index])
+        self.retrieval_data_dir = os.path.join(self.retrieval_data_dad_dir,
+                                               self.retrieval_data_list[self.retrieval_data_index])
         self.show_img_in_graphicview(self.graphicsView_retrieval_img, self.retrieval_data_dir)  # 显示待搜索图像
         self.label_retrieval_img.setText('待搜索图像：{}'.format(self.retrieval_data_dir))  # 修改待搜索图像下方label
         # 1.图片推理
@@ -372,7 +374,7 @@ class RetrievalProgram(QMainWindow, Ui_MainWindow, Ui_widget_progress_bar):  # �
         img = img.convert("RGB")  # 将图像转化成RGB的
         img = numpy.array(img)
         (img_height, img_width, _) = img.shape
-        show_img = QImage(img, img_width, img_height, img_width*3, QImage.Format_RGB888)
+        show_img = QImage(img, img_width, img_height, img_width * 3, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(show_img)  # 作为QPixmap对象，可以加载到一个空间中，通常是标签或者按钮中显示图像
         pixmapItem = QGraphicsPixmapItem(pixmap)  # 创建像素图元
         scene = QGraphicsScene()  # 创建场景

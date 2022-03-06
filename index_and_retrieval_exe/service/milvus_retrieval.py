@@ -8,10 +8,11 @@ from milvus import Milvus, IndexType, MetricType
 
 THRESHOLD = float(os.environ.get('THRESHOLD', '0.5'))  # 检索阈值
 
+
 class MilvusRetrieval(object):
     def __init__(self, index_name, index_dir,
-        host=os.environ.get("MILVUS_HOST", "127.0.0.1"),
-        port=os.environ.get("MILVUS_PORT", 19530)):
+                 host=os.environ.get("MILVUS_HOST", "127.0.0.1"),
+                 port=os.environ.get("MILVUS_PORT", 19530)):
         self.client = Milvus(host, port)
         self.index_name = index_name
         self.load(index_dir)
@@ -25,9 +26,11 @@ class MilvusRetrieval(object):
         # 2. 入库Milvus
         if self.index_name in self.client.list_collections()[1]:
             self.client.drop_collection(collection_name=self.index_name)
-        self.client.create_collection({'collection_name': self.index_name, 'dimension': 512, 'index_file_size': 1024, 'metric_type': MetricType.IP})
+        self.client.create_collection({'collection_name': self.index_name, 'dimension': 512, 'index_file_size': 1024,
+                                       'metric_type': MetricType.IP})
         self.id_dict = {}
-        status, ids = self.client.insert(collection_name=self.index_name, records=[i.tolist() for i in self.retrieval_db])
+        status, ids = self.client.insert(collection_name=self.index_name,
+                                         records=[i.tolist() for i in self.retrieval_db])
         for i, val in enumerate(self.retrieval_name):
             self.id_dict[ids[i]] = str(val)
         self.client.create_index(self.index_name, IndexType.FLAT, {'nlist': 16384})
@@ -36,7 +39,8 @@ class MilvusRetrieval(object):
 
     def retrieve(self, query_vector, search_size=3):
         r_list = []
-        _, vectors = self.client.search(collection_name=self.index_name, query_records=[query_vector], top_k=search_size, params={'nprobe': 16})
+        _, vectors = self.client.search(collection_name=self.index_name, query_records=[query_vector],
+                                        top_k=search_size, params={'nprobe': 16})
         for v in vectors[0]:
             score = float(v.distance) * 0.5 + 0.5
             if score > THRESHOLD:

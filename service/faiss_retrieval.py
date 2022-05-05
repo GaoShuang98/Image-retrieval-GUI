@@ -30,10 +30,12 @@ class FaissRetrieval(object):
         score_list, index_list = self.index.search(np.array([query_vector]).astype(np.float32), search_size)
         r_list = []
         for i, val in enumerate(index_list[0]):
+            position = i
             name = self.retrieval_name[int(val)]
             score = float(score_list[0][i]) * 0.5 + 0.5
             if score > THRESHOLD:
                 temp = {
+                    "position": position,
                     "name": name,
                     "score": round(score, 6)
                 }

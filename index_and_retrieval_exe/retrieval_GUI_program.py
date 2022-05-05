@@ -22,6 +22,7 @@ from service.milvus_retrieval import MilvusRetrieval
 from service.numpy_retrieval import NumpyRetrieval
 from service.vggnet import VGGNet
 from widget_progress_bar import Ui_widget_progress_bar
+import scipy.io as scio
 
 
 class RetrievalResult:
@@ -34,7 +35,7 @@ class RetrievalResult:
 class RetrievalEngine(object):
 
     def __init__(self, index_file, db_name):
-        self.index_file = index_file
+        self.index_file = index_file  # 索引库H5文件所的路径
         self.db_name = db_name
         self.numpy_r = self.faiss_r = self.es_r = self.milvus_r = None
 
@@ -81,6 +82,7 @@ class IndexWorkThread(QThread):
         self.retrieval_DB_dir = retrieval_DB_dir
         self.feats = []
         self.names = []
+
 
     def run(self):
         print('start_index(self) clicked!')
@@ -136,6 +138,7 @@ class RetrievalProgram(QMainWindow, Ui_MainWindow, Ui_widget_progress_bar):  # �
         self.retrieval_data_list = []  # 待搜索图像所在文件夹所有的图像路径list
         self.retrieval_data_index = None  # 当前待搜索图像在该文件夹list中的索引
         self.retrieval_data_dad_dir = None
+        self.read_mat()  # 从mat文件中获取索引库与验证图像的GPS坐标数据，以对算法进行准确率验证
 
     def get_retrieval_DB_dir(self):
         """
@@ -162,7 +165,6 @@ class RetrievalProgram(QMainWindow, Ui_MainWindow, Ui_widget_progress_bar):  # �
         """
         获得训练图像文件并可视化到窗体上面
         Returns:
-
         """
         print('get_img_dir() clicked!')
         self.train_data_dir = os.path.dirname(
@@ -267,13 +269,13 @@ class RetrievalProgram(QMainWindow, Ui_MainWindow, Ui_widget_progress_bar):  # �
         self.retrieval_data_index -= 1
         if self.retrieval_data_index == -1:
             self.retrieval_data_index = len(self.retrieval_data_list) - 1
-        self.retrieval_DB_dir = self.lineEdit_retrieval_DB_dir.text()
+        self.retrieval_DB_dir = self.lineEdit_retrieval_DB_dir.text()  # 图像文件索引库.H5文件路径
         self.retrieval_data_dir = os.path.join(self.retrieval_data_dad_dir,
                                                self.retrieval_data_list[self.retrieval_data_index])
         self.show_img_in_graphicview(self.graphicsView_retrieval_img, self.retrieval_data_dir)  # 显示待搜索图像
         self.label_retrieval_img.setText('待搜索图像：{}'.format(self.retrieval_data_dir))  # 修改待搜索图像下方label
         # 1.图片推理
-        model = VGGNet()
+        model = VGGNet()  # VGGNet神经网络的实例化
         query_vector = model.vgg_extract_feat(self.retrieval_data_dir)  # 利用model.vgg_extract_feat()函数生成待查询图像的特征向量
         # 2.图片检索
         re = RetrievalEngine(self.retrieval_DB_dir, self.db_name)  # 传入参数 index_file, db_name
@@ -394,11 +396,11 @@ class RetrievalProgram(QMainWindow, Ui_MainWindow, Ui_widget_progress_bar):  # �
         print(self.comboBox.currentText())
         result = re.get_method(self.comboBox.currentText())(query_vector)  # 根据所选择的图像检索方式进行检索
 
-        pic_1 = RetrievalResult()
+        pic_1 = RetrievalResult()  # 数据结构体类的实例化
         pic_2 = RetrievalResult()
         pic_3 = RetrievalResult()
 
-        self.graphicsView_retrieved_img_1.clearMask()
+        self.graphicsView_retrieved_img_1.clearMask()  # 清空Graphicsview控件中的内容
         self.graphicsView_retrieved_img_2.clearMask()
         self.graphicsView_retrieved_img_3.clearMask()
         try:
@@ -428,6 +430,29 @@ class RetrievalProgram(QMainWindow, Ui_MainWindow, Ui_widget_progress_bar):  # �
         except:
             self.show_img_in_graphicview(self.graphicsView_retrieved_img_3, 'cross.png')
             self.label_retrieved_img_3.setText('无结果')
+
+    def read_mat(self):
+        GPS_Coordinate_Images_dir = 'GPS_Coordinate_Images.mat'
+        GPS_Coordinate_Query_dir = 'GPS_Coordinate_Query.mat'
+        GPS_Location_Images_dir = 'GPS_Location_Images.mat'
+        GPS_Location_Query_dir = 'GPS_Location_Query.mat'
+
+        """  {'__header__': b'MATLAB 5.0 MAT-file,
+        Platform: GLNXA64, 
+        Created on: Thu Feb  2 18:36:11 2017', 
+        '__version__': '1.0', '__globals__': [], 
+        'GPS_Coordinate_Images': array([ [4406384.20749033,  712207.45792042, 4537594.48968971], ... 
+        [4406393.28828793,  712220.76294289, 4537583.58311603],]}
+        """
+        GPS_Coordinate_Images_list = scio.loadmat(GPS_Coordinate_Images_dir)['GPS_Coordinate_Images']  # 加载mat文件成dict形式，其中
+        GPS_Coordinate_Query_list = scio.loadmat(GPS_Coordinate_Query_dir)['GPS_Coordinate_Query']
+        GPS_Location_Images_list = scio.loadmat(GPS_Location_Images_dir)['GPS_Location_Images']
+        GPS_Location_Query_list = scio.loadmat(GPS_Location_Query_dir)['GPS_Location_Query']
+
+        print("GPS_Coordinate_Images_list:{}".format(GPS_Coordinate_Images_list))
+        print("GPS_Coordinate_Query_list:{}".format(GPS_Coordinate_Query_list))
+        print("GPS_Location_Images_list:{}".format(GPS_Location_Images_list))
+        print("GPS_Location_Query_list:{}".format(GPS_Location_Query_list))
 
 
 if __name__ == '__main__':
